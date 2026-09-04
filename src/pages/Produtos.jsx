@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PackagePlus, Search, Edit2, Trash2, Plus, Minus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import { toastConfirm } from '../utils/toastConfirm';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc } from 'firebase/firestore';
@@ -65,7 +66,10 @@ export default function Produtos() {
   });
 
   return (
-    <div className="page-container">
+    <motion.div 
+      className="page-container"
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
+    >
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 className="header-title">Produtos</h1>
@@ -166,6 +170,6 @@ export default function Produtos() {
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

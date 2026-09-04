@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Save, User, Percent } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import '../components.css';
 
 export default function Configuracoes() {
   const [nome, setNome] = useState('');
@@ -22,7 +24,10 @@ export default function Configuracoes() {
   };
 
   return (
-    <div className="page-container">
+    <motion.div 
+      className="page-container"
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
+    >
       <header style={{ marginBottom: '24px' }}>
         <h1 className="header-title">Configurações</h1>
         <p className="subtitle">Ajuste as preferências do seu app</p>
@@ -59,6 +64,6 @@ export default function Configuracoes() {
           <Save size={20} /> Salvar Alterações
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 }

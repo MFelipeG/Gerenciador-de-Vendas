@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Search, MessageCircle, ShoppingBag, CheckCircle, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -83,7 +84,10 @@ export default function Clientes() {
   );
 
   return (
-    <div className="page-container" style={{ position: 'relative' }}>
+    <motion.div 
+      className="page-container" style={{ position: 'relative' }}
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
+    >
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 className="header-title">Clientes</h1>
@@ -178,6 +182,6 @@ export default function Clientes() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

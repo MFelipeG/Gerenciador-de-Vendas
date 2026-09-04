@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 import { Home, Users, PlusCircle, Package, Settings } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
@@ -10,7 +13,9 @@ import { Toaster } from 'react-hot-toast';
 import './index.css';
 import './components.css';
 
-function BottomNav() {
+import './components.css';
+
+function BottomNav({ pendingCount }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,6 +35,11 @@ function BottomNav() {
           className={`nav-item ${location.pathname === item.path ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
           onClick={() => navigate(item.path)}
         >
+          {item.path === '/' && pendingCount > 0 && (
+            <span style={{ position: 'absolute', top: '8px', right: '16px', background: '#ff4a5a', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px' }}>
+              {pendingCount}
+            </span>
+          )}
           {item.icon}
           {!item.highlight && <span>{item.label}</span>}
         </button>
@@ -38,9 +48,47 @@ function BottomNav() {
   );
 }
 
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/clientes" element={<Clientes />} />
+        <Route path="/nova-venda" element={<NovaVenda />} />
+        <Route path="/produtos" element={<Produtos />} />
+        <Route path="/config" element={<Configuracoes />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 function App() {
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'vendas'), (snapshot) => {
+      const allVendas = snapshot.docs.map(doc => doc.data());
+      const hoje = new Date();
+      hoje.setHours(0,0,0,0);
+      
+      let count = 0;
+      allVendas.forEach(venda => {
+        if (venda.status !== 'pago' && venda.dataPagamento) {
+          const dataPg = new Date(venda.dataPagamento);
+          dataPg.setMinutes(dataPg.getMinutes() + dataPg.getTimezoneOffset());
+          dataPg.setHours(0,0,0,0);
+          if (dataPg <= hoje) count++; // Atrasado ou Vence Hoje
+        }
+      });
+      setPendingCount(count);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <BrowserRouter>
+      <div className="bg-orbs" />
       <Toaster position="top-center" toastOptions={{
         style: {
           background: 'rgba(30, 20, 50, 0.8)',
@@ -51,14 +99,8 @@ function App() {
         },
         success: { iconTheme: { primary: '#e81cff', secondary: '#fff' } }
       }} />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/clientes" element={<Clientes />} />
-        <Route path="/nova-venda" element={<NovaVenda />} />
-        <Route path="/produtos" element={<Produtos />} />
-        <Route path="/config" element={<Configuracoes />} />
-      </Routes>
-      <BottomNav />
+      <AnimatedRoutes />
+      <BottomNav pendingCount={pendingCount} />
     </BrowserRouter>
   );
 }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
-import { Calendar, CheckCircle } from 'lucide-react';
+import { Calendar, CheckCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import '../components.css';
 
 export default function Dashboard() {
@@ -96,8 +97,24 @@ export default function Dashboard() {
     }
   };
 
+  const handleWhatsApp = (venda) => {
+    const saudacao = vendedora ? `Olá, aqui é a ${vendedora}!` : `Olá!`;
+    const mensagem = `${saudacao} 🛍️ Passando para lembrar da sua comprinha de *${venda.produtoNome}* no valor de *€ ${venda.valor?.toFixed(2)}*. O acerto está previsto para ${formatarData(venda.dataPagamento)}. Muito obrigada pela preferência!`;
+    const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank');
+  };
+
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    in: { opacity: 1, y: 0 },
+    out: { opacity: 0, y: -20 }
+  };
+
   return (
-    <div className="page-container">
+    <motion.div 
+      className="page-container"
+      initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ duration: 0.3 }}
+    >
       <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
         <div>
           <h1 className="header-title">{getSaudacao()}{vendedora ? `, ${vendedora}` : ''}!</h1>
@@ -150,12 +167,16 @@ export default function Dashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3>Vendas de {meses[mesSelecionado]}</h3>
         </div>
-        
-        {vendas.length === 0 && <p style={{color: 'var(--text-muted)'}}>Nenhuma venda registrada neste mês.</p>}
-
-        {vendas.map(venda => (
-          <div key={venda.id} className="glass list-item">
-            <div className="avatar">{venda.clienteNome?.charAt(0).toUpperCase()}</div>
+        <div className="vendas-list">
+        {vendas.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhuma venda este mês.</p>}
+        {vendas.map((venda, index) => (
+          <motion.div 
+            key={venda.id} 
+            className="glass list-item"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
             <div className="info">
               <h4>{venda.clienteNome}</h4>
               <p>{venda.produtoNome}</p>
@@ -169,17 +190,26 @@ export default function Dashboard() {
                 {getStatusInfo(venda).texto}
               </p>
               {venda.status !== 'pago' && (
-                <button 
-                  onClick={() => handleMarcarPago(venda.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #00e676', color: '#00e676', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
-                >
-                  <CheckCircle size={14} /> Receber
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => handleWhatsApp(venda)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid var(--magenta)', color: 'var(--magenta)', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
+                  >
+                    <MessageCircle size={14} /> Cobrar
+                  </button>
+                  <button 
+                    onClick={() => handleMarcarPago(venda.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #00e676', color: '#00e676', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
+                  >
+                    <CheckCircle size={14} /> Receber
+                  </button>
+                </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
+        </div>
       </section>
-    </div>
+    </motion.div>
   );
 }

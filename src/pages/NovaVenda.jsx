@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Calendar, User } from 'lucide-react';
+import { ShoppingBag, Calendar, User, ShoppingCart } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function NovaVenda() {
   const [venda, setVenda] = useState({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubC = onSnapshot(collection(db, 'clientes'), (snap) => setClientes(snap.docs.map(d => ({id: d.id, ...d.data()}))));
@@ -41,11 +44,15 @@ export default function NovaVenda() {
       });
       toast.success('Venda registrada com sucesso!');
       setVenda({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
+      navigate('/');
     }
   };
 
   return (
-    <div className="page-container">
+    <motion.div 
+      className="page-container"
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
+    >
       <header style={{ marginBottom: '24px' }}>
         <h1 className="header-title">Nova Venda</h1>
         <p className="subtitle">Registre o pedido da cliente</p>
@@ -87,8 +94,10 @@ export default function NovaVenda() {
           <input type="date" className="input-field" required value={venda.dataPagamento} onChange={e => setVenda({...venda, dataPagamento: e.target.value})} />
         </div>
 
-        <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>Finalizar Venda</button>
+        <button type="submit" className="btn-primary" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <ShoppingCart size={20} /> Registrar Venda
+        </button>
       </form>
-    </div>
+    </motion.div>
   );
 }

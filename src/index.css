@@ -26,11 +26,61 @@
 }
 
 body {
-  background: radial-gradient(circle at top left, var(--bg-gradient-1), var(--bg-dark) 40%, var(--bg-gradient-2) 100%);
-  background-attachment: fixed;
+  background: var(--bg-dark);
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Background Animated Orbs */
+.bg-orbs {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--bg-dark);
+}
+
+.bg-orbs::before,
+.bg-orbs::after {
+  content: "";
+  position: absolute;
+  width: 60vh;
+  height: 60vh;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: float 20s infinite ease-in-out;
+}
+
+.bg-orbs::before {
+  background: radial-gradient(circle, var(--magenta) 0%, transparent 70%);
+  top: -10vh;
+  left: -20vw;
+}
+
+.bg-orbs::after {
+  background: radial-gradient(circle, var(--purple) 0%, transparent 70%);
+  bottom: -20vh;
+  right: -20vw;
+  animation-delay: -10s;
+  animation-duration: 25s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-30px, 50px) scale(0.9);
+  }
 }
 
 #root {
