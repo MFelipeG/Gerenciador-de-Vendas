@@ -75,6 +75,8 @@ export default function Clientes() {
     } catch (error) {
       toast.error('Erro ao atualizar pagamentos.');
     }
+  };
+
   const filteredClientes = clientes.filter(c => 
     c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
     (c.telefone && c.telefone.includes(searchTerm))
