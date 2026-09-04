@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+:root {
+  --magenta: #e81cff;
+  --purple: #40c9ff;
+  --orange: #ff9e00;
+  
+  --bg-dark: #0b0914;
+  --bg-gradient-1: #1a1025;
+  --bg-gradient-2: #10162a;
+  
+  --text-main: #ffffff;
+  --text-muted: #8e8d99;
+  
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  font-family: 'Outfit', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: radial-gradient(circle at top left, var(--bg-gradient-1), var(--bg-dark) 40%, var(--bg-gradient-2) 100%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+
+/* Glassmorphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--magenta), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Typography */
+h1, h2, h3 { font-weight: 700; }
+.header-title { font-size: 1.5rem; margin-bottom: 4px; }
+.subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 300; }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--magenta), #ff4a5a);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Page Layout */
+.page-container {
+  padding: 24px 20px;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
