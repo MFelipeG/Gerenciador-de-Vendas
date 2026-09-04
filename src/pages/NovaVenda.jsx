@@ -1,24 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Calendar, User } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 
 export default function NovaVenda() {
-  const [venda, setVenda] = useState({ clienteId: '', produtoId: '', dataVenda: '', dataPagamento: '' });
+  const [venda, setVenda] = useState({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
+  const [clientes, setClientes] = useState([]);
+  const [produtos, setProdutos] = useState([]);
 
-  // Mock data for dropdowns
-  const clientes = [
-    { id: 1, nome: 'Maria Silva' },
-    { id: 2, nome: 'Carla Mendes' },
-  ];
-  
-  const produtos = [
-    { id: 1, nome: 'Lily Eau de Parfum - R$ 299,90' },
-    { id: 2, nome: 'Malbec Gold - R$ 189,90' },
-  ];
+  useEffect(() => {
+    const unsubC = onSnapshot(collection(db, 'clientes'), (snap) => setClientes(snap.docs.map(d => ({id: d.id, ...d.data()}))));
+    const unsubP = onSnapshot(collection(db, 'produtos'), (snap) => setProdutos(snap.docs.map(d => ({id: d.id, ...d.data()}))));
+    return () => { unsubC(); unsubP(); };
+  }, []);
 
-  const handleSalvar = (e) => {
+  const handleProdutoChange = (e) => {
+    const pId = e.target.value;
+    const prod = produtos.find(p => p.id === pId);
+    if (prod) {
+      setVenda({ ...venda, produtoId: pId, produtoNome: prod.nome, valor: prod.precoVenda, lucro: prod.precoVenda - prod.precoCusto });
+    } else {
+      setVenda({ ...venda, produtoId: '' });
+    }
+  };
+
+  const handleClienteChange = (e) => {
+    const cId = e.target.value;
+    const cli = clientes.find(c => c.id === cId);
+    setVenda({ ...venda, clienteId: cId, clienteNome: cli ? cli.nome : '' });
+  };
+
+  const handleSalvar = async (e) => {
     e.preventDefault();
-    alert('Venda salva com sucesso!');
-    // In future: push to Firebase
+    if(venda.clienteId && venda.produtoId) {
+      await addDoc(collection(db, 'vendas'), {
+        ...venda,
+        status: 'pendente',
+        dataCriacao: new Date().toISOString()
+      });
+      alert('Venda registrada com sucesso!');
+      setVenda({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
+    }
   };
 
   return (
@@ -34,7 +56,7 @@ export default function NovaVenda() {
           <label style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', color: 'var(--text-muted)' }}>
             <User size={18} /> Cliente
           </label>
-          <select className="input-field" required value={venda.clienteId} onChange={e => setVenda({...venda, clienteId: e.target.value})}>
+          <select className="input-field" required value={venda.clienteId} onChange={handleClienteChange}>
             <option value="">Selecione a cliente</option>
             {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
@@ -44,9 +66,9 @@ export default function NovaVenda() {
           <label style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', color: 'var(--text-muted)' }}>
             <ShoppingBag size={18} /> Produto
           </label>
-          <select className="input-field" required value={venda.produtoId} onChange={e => setVenda({...venda, produtoId: e.target.value})}>
+          <select className="input-field" required value={venda.produtoId} onChange={handleProdutoChange}>
             <option value="">Selecione o produto</option>
-            {produtos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
+            {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} - R$ {p.precoVenda?.toFixed(2)}</option>)}
           </select>
         </div>
 

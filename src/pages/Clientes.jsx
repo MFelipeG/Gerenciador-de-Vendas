@@ -1,25 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Edit2, Trash2 } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export default function Clientes() {
-  const [clientes, setClientes] = useState([
-    { id: 1, nome: 'Maria Silva', telefone: '(11) 99999-9999' },
-    { id: 2, nome: 'Carla Mendes', telefone: '(11) 98888-8888' },
-  ]);
+  const [clientes, setClientes] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [novoCliente, setNovoCliente] = useState({ nome: '', telefone: '' });
 
-  const handleSalvar = (e) => {
+  useEffect(() => {
+    const q = query(collection(db, 'clientes'), orderBy('nome'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setClientes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSalvar = async (e) => {
     e.preventDefault();
     if (novoCliente.nome) {
-      setClientes([...clientes, { id: Date.now(), ...novoCliente }]);
+      await addDoc(collection(db, 'clientes'), novoCliente);
       setNovoCliente({ nome: '', telefone: '' });
       setShowForm(false);
     }
   };
 
-  const handleExcluir = (id) => {
-    setClientes(clientes.filter(c => c.id !== id));
+  const handleExcluir = async (id) => {
+    if (window.confirm('Excluir cliente?')) {
+      await deleteDoc(doc(db, 'clientes', id));
+    }
   };
 
   return (
@@ -62,15 +71,15 @@ export default function Clientes() {
       </div>
 
       <div className="clientes-list">
+        {clientes.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum cliente cadastrado.</p>}
         {clientes.map(cliente => (
           <div key={cliente.id} className="glass list-item">
-            <div className="avatar">{cliente.nome.charAt(0)}</div>
+            <div className="avatar">{cliente.nome.charAt(0).toUpperCase()}</div>
             <div className="info">
               <h4>{cliente.nome}</h4>
               <p>{cliente.telefone}</p>
             </div>
             <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)' }}>
-              <Edit2 size={18} style={{ cursor: 'pointer' }} />
               <Trash2 size={18} style={{ cursor: 'pointer', color: '#ff4a5a' }} onClick={() => handleExcluir(cliente.id)} />
             </div>
           </div>

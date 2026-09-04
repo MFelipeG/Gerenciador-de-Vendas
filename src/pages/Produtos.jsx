@@ -1,30 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PackagePlus, Search, Edit2, Trash2 } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export default function Produtos() {
-  const [produtos, setProdutos] = useState([
-    { id: 1, nome: 'Lily Eau de Parfum', precoCusto: 150.00, precoVenda: 299.90, estoque: 2 },
-    { id: 2, nome: 'Malbec Gold', precoCusto: 90.00, precoVenda: 189.90, estoque: 5 },
-  ]);
+  const [produtos, setProdutos] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [novoProduto, setNovoProduto] = useState({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
 
-  const handleSalvar = (e) => {
+  useEffect(() => {
+    const q = query(collection(db, 'produtos'), orderBy('nome'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setProdutos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSalvar = async (e) => {
     e.preventDefault();
     if (novoProduto.nome) {
-      setProdutos([...produtos, { 
-        id: Date.now(), 
-        ...novoProduto,
+      await addDoc(collection(db, 'produtos'), {
+        nome: novoProduto.nome,
         precoCusto: parseFloat(novoProduto.precoCusto || 0),
         precoVenda: parseFloat(novoProduto.precoVenda || 0),
-      }]);
+        estoque: parseInt(novoProduto.estoque || 0)
+      });
       setNovoProduto({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
       setShowForm(false);
     }
   };
 
-  const handleExcluir = (id) => {
-    setProdutos(produtos.filter(p => p.id !== id));
+  const handleExcluir = async (id) => {
+    if (window.confirm('Excluir produto?')) {
+      await deleteDoc(doc(db, 'produtos', id));
+    }
   };
 
   return (
@@ -66,6 +75,13 @@ export default function Produtos() {
               onChange={(e) => setNovoProduto({...novoProduto, precoVenda: e.target.value})} 
             />
           </div>
+          <input 
+            type="number" 
+            placeholder="Estoque Inicial" 
+            className="input-field" 
+            value={novoProduto.estoque} 
+            onChange={(e) => setNovoProduto({...novoProduto, estoque: e.target.value})} 
+          />
           <button type="submit" className="btn-primary">Salvar Produto</button>
         </form>
       )}
@@ -76,6 +92,7 @@ export default function Produtos() {
       </div>
 
       <div className="produtos-list">
+        {produtos.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum produto cadastrado.</p>}
         {produtos.map(produto => (
           <div key={produto.id} className="glass list-item" style={{ alignItems: 'flex-start' }}>
             <div className="avatar" style={{ background: 'var(--bg-gradient-2)', borderRadius: '12px' }}>
@@ -83,12 +100,11 @@ export default function Produtos() {
             </div>
             <div className="info">
               <h4>{produto.nome}</h4>
-              <p style={{ color: '#00e676', fontWeight: 'bold' }}>R$ {produto.precoVenda.toFixed(2)}</p>
-              <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: R$ {produto.precoCusto.toFixed(2)} • Lucro: R$ {(produto.precoVenda - produto.precoCusto).toFixed(2)}</p>
+              <p style={{ color: '#00e676', fontWeight: 'bold' }}>R$ {produto.precoVenda?.toFixed(2)}</p>
+              <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: R$ {produto.precoCusto?.toFixed(2)} • Lucro: R$ {(produto.precoVenda - produto.precoCusto)?.toFixed(2)}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-end' }}>
               <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)' }}>
-                <Edit2 size={18} style={{ cursor: 'pointer' }} />
                 <Trash2 size={18} style={{ cursor: 'pointer', color: '#ff4a5a' }} onClick={() => handleExcluir(produto.id)} />
               </div>
               <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '8px' }}>Estoque: {produto.estoque}</span>
