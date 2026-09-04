@@ -57,6 +57,9 @@ export default function Produtos() {
     } catch (error) {
       toast.error('Erro ao atualizar estoque');
     }
+  };
+
+  const filteredProdutos = produtos.filter(p => {
     const term = searchTerm.toLowerCase();
     return p.nome.toLowerCase().includes(term) || (p.codigo && p.codigo.toLowerCase().includes(term));
   });
