@@ -1,18 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Save, User } from 'lucide-react';
+import { Save, User, Percent } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Configuracoes() {
   const [nome, setNome] = useState('');
+  const [lucroPadrao, setLucroPadrao] = useState(30);
 
   useEffect(() => {
     const savedName = localStorage.getItem('vendedoraNome');
     if (savedName) setNome(savedName);
+    
+    const savedLucro = localStorage.getItem('lucroPadrao');
+    if (savedLucro) setLucroPadrao(savedLucro);
   }, []);
 
   const handleSalvar = (e) => {
     e.preventDefault();
     localStorage.setItem('vendedoraNome', nome);
+    localStorage.setItem('lucroPadrao', lucroPadrao);
     toast.success('Configurações salvas com sucesso!');
   };
 
@@ -34,6 +38,19 @@ export default function Configuracoes() {
             placeholder="Como quer ser chamada?" 
             value={nome} 
             onChange={e => setNome(e.target.value)} 
+          />
+        </div>
+        
+        <div>
+          <label style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', color: 'var(--text-muted)' }}>
+            <Percent size={18} /> Margem de Lucro Padrão (%)
+          </label>
+          <input 
+            type="number" 
+            className="input-field" 
+            placeholder="Ex: 30" 
+            value={lucroPadrao} 
+            onChange={e => setLucroPadrao(e.target.value)} 
           />
         </div>
         

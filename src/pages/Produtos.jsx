@@ -9,8 +9,12 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [novoProduto, setNovoProduto] = useState({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
+  const [lucroPadrao, setLucroPadrao] = useState(30);
 
   useEffect(() => {
+    const savedLucro = localStorage.getItem('lucroPadrao');
+    if (savedLucro) setLucroPadrao(Number(savedLucro));
+
     const q = query(collection(db, 'produtos'), orderBy('nome'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setProdutos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -79,26 +83,34 @@ export default function Produtos() {
           <div style={{ display: 'flex', gap: '12px' }}>
             <input 
               type="number" 
+              placeholder="Venda (€)" 
+              className="input-field" 
+              value={novoProduto.precoVenda} 
+              onChange={(e) => {
+                const venda = e.target.value;
+                const custoAuto = venda ? (parseFloat(venda) * (1 - (lucroPadrao / 100))).toFixed(2) : '';
+                setNovoProduto({...novoProduto, precoVenda: venda, precoCusto: custoAuto});
+              }} 
+              required
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <input 
+              type="number" 
               placeholder="Custo (€)" 
               className="input-field" 
               value={novoProduto.precoCusto} 
               onChange={(e) => setNovoProduto({...novoProduto, precoCusto: e.target.value})} 
+              required
             />
             <input 
               type="number" 
-              placeholder="Venda (€)" 
+              placeholder="Estoque Inicial" 
               className="input-field" 
-              value={novoProduto.precoVenda} 
-              onChange={(e) => setNovoProduto({...novoProduto, precoVenda: e.target.value})} 
+              value={novoProduto.estoque} 
+              onChange={(e) => setNovoProduto({...novoProduto, estoque: e.target.value})} 
             />
           </div>
-          <input 
-            type="number" 
-            placeholder="Estoque Inicial" 
-            className="input-field" 
-            value={novoProduto.estoque} 
-            onChange={(e) => setNovoProduto({...novoProduto, estoque: e.target.value})} 
-          />
           <button type="submit" className="btn-primary">Salvar Produto</button>
         </form>
       )}
