@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import Produtos from './pages/Produtos';
 import NovaVenda from './pages/NovaVenda';
+import Configuracoes from './pages/Configuracoes';
 import './index.css';
 import './components.css';
 
@@ -44,7 +45,7 @@ function App() {
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/nova-venda" element={<NovaVenda />} />
         <Route path="/produtos" element={<Produtos />} />
-        <Route path="/config" element={<div className="page-container"><h2>Configurações</h2></div>} />
+        <Route path="/config" element={<Configuracoes />} />
       </Routes>
       <BottomNav />
     </BrowserRouter>

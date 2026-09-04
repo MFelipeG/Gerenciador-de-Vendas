@@ -62,14 +62,14 @@ export default function Produtos() {
           <div style={{ display: 'flex', gap: '12px' }}>
             <input 
               type="number" 
-              placeholder="Custo (R$)" 
+              placeholder="Custo (€)" 
               className="input-field" 
               value={novoProduto.precoCusto} 
               onChange={(e) => setNovoProduto({...novoProduto, precoCusto: e.target.value})} 
             />
             <input 
               type="number" 
-              placeholder="Venda (R$)" 
+              placeholder="Venda (€)" 
               className="input-field" 
               value={novoProduto.precoVenda} 
               onChange={(e) => setNovoProduto({...novoProduto, precoVenda: e.target.value})} 
@@ -100,8 +100,8 @@ export default function Produtos() {
             </div>
             <div className="info">
               <h4>{produto.nome}</h4>
-              <p style={{ color: '#00e676', fontWeight: 'bold' }}>R$ {produto.precoVenda?.toFixed(2)}</p>
-              <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: R$ {produto.precoCusto?.toFixed(2)} • Lucro: R$ {(produto.precoVenda - produto.precoCusto)?.toFixed(2)}</p>
+              <p style={{ color: '#00e676', fontWeight: 'bold' }}>€ {produto.precoVenda?.toFixed(2)}</p>
+              <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: € {produto.precoCusto?.toFixed(2)} • Lucro: € {(produto.precoVenda - produto.precoCusto)?.toFixed(2)}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-end' }}>
               <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)' }}>

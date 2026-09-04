@@ -68,7 +68,7 @@ export default function NovaVenda() {
           </label>
           <select className="input-field" required value={venda.produtoId} onChange={handleProdutoChange}>
             <option value="">Selecione o produto</option>
-            {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} - R$ {p.precoVenda?.toFixed(2)}</option>)}
+            {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} - € {p.precoVenda?.toFixed(2)}</option>)}
           </select>
         </div>
 
