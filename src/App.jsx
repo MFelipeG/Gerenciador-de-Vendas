@@ -2,7 +2,11 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, PlusCircle, Package, Settings } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
+import Clientes from './pages/Clientes';
+import Produtos from './pages/Produtos';
+import NovaVenda from './pages/NovaVenda';
 import './index.css';
+import './components.css';
 
 function BottomNav() {
   const navigate = useNavigate();
@@ -37,9 +41,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/clientes" element={<div className="page-container"><h2>Clientes</h2></div>} />
-        <Route path="/nova-venda" element={<div className="page-container"><h2>Nova Venda</h2></div>} />
-        <Route path="/produtos" element={<div className="page-container"><h2>Produtos</h2></div>} />
+        <Route path="/clientes" element={<Clientes />} />
+        <Route path="/nova-venda" element={<NovaVenda />} />
+        <Route path="/produtos" element={<Produtos />} />
         <Route path="/config" element={<div className="page-container"><h2>Configurações</h2></div>} />
       </Routes>
       <BottomNav />
