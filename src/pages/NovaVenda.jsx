@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Calendar, User } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
 export default function NovaVenda() {
   const [venda, setVenda] = useState({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
@@ -38,7 +39,7 @@ export default function NovaVenda() {
         status: 'pendente',
         dataCriacao: new Date().toISOString()
       });
-      alert('Venda registrada com sucesso!');
+      toast.success('Venda registrada com sucesso!');
       setVenda({ clienteId: '', clienteNome: '', produtoId: '', produtoNome: '', valor: 0, lucro: 0, dataVenda: '', dataPagamento: '' });
     }
   };

@@ -6,6 +6,7 @@ import Clientes from './pages/Clientes';
 import Produtos from './pages/Produtos';
 import NovaVenda from './pages/NovaVenda';
 import Configuracoes from './pages/Configuracoes';
+import { Toaster } from 'react-hot-toast';
 import './index.css';
 import './components.css';
 
@@ -40,6 +41,16 @@ function BottomNav() {
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" toastOptions={{
+        style: {
+          background: 'rgba(30, 20, 50, 0.8)',
+          color: '#fff',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '16px'
+        },
+        success: { iconTheme: { primary: '#e81cff', secondary: '#fff' } }
+      }} />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clientes" element={<Clientes />} />

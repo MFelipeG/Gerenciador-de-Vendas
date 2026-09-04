@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Configuracoes() {
   const [nome, setNome] = useState('');
@@ -12,7 +13,7 @@ export default function Configuracoes() {
   const handleSalvar = (e) => {
     e.preventDefault();
     localStorage.setItem('vendedoraNome', nome);
-    alert('Configurações salvas com sucesso!');
+    toast.success('Configurações salvas com sucesso!');
   };
 
   return (

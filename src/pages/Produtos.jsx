@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PackagePlus, Search, Edit2, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { toastConfirm } from '../utils/toastConfirm';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
@@ -19,21 +21,27 @@ export default function Produtos() {
   const handleSalvar = async (e) => {
     e.preventDefault();
     if (novoProduto.nome) {
-      await addDoc(collection(db, 'produtos'), {
-        nome: novoProduto.nome,
-        precoCusto: parseFloat(novoProduto.precoCusto || 0),
-        precoVenda: parseFloat(novoProduto.precoVenda || 0),
-        estoque: parseInt(novoProduto.estoque || 0)
-      });
-      setNovoProduto({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
-      setShowForm(false);
+      try {
+        await addDoc(collection(db, 'produtos'), {
+          nome: novoProduto.nome,
+          precoCusto: parseFloat(novoProduto.precoCusto || 0),
+          precoVenda: parseFloat(novoProduto.precoVenda || 0),
+          estoque: parseInt(novoProduto.estoque || 0)
+        });
+        setNovoProduto({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
+        setShowForm(false);
+        toast.success('Produto adicionado!');
+      } catch (error) {
+        toast.error('Erro ao adicionar produto');
+      }
     }
   };
 
   const handleExcluir = async (id) => {
-    if (window.confirm('Excluir produto?')) {
+    toastConfirm('Excluir este produto?', async () => {
       await deleteDoc(doc(db, 'produtos', id));
-    }
+      toast.success('Produto excluído');
+    });
   };
 
   return (

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Search } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import { toastConfirm } from '../utils/toastConfirm';
+import '../components.css';
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
@@ -18,17 +21,27 @@ export default function Clientes() {
 
   const handleSalvar = async (e) => {
     e.preventDefault();
-    if (novoCliente.nome) {
-      await addDoc(collection(db, 'clientes'), novoCliente);
-      setNovoCliente({ nome: '', telefone: '' });
-      setShowForm(false);
+    try {
+      if (novoCliente.nome) {
+        await addDoc(collection(db, 'clientes'), { ...novoCliente, dataCadastro: new Date().toISOString() });
+        setNovoCliente({ nome: '', telefone: '' });
+        setShowForm(false);
+        toast.success('Cliente adicionado!');
+      }
+    } catch (error) {
+      toast.error('Erro ao salvar cliente');
     }
   };
 
-  const handleExcluir = async (id) => {
-    if (window.confirm('Excluir cliente?')) {
-      await deleteDoc(doc(db, 'clientes', id));
-    }
+  const handleExcluir = (id) => {
+    toastConfirm('Tem certeza que deseja excluir este cliente?', async () => {
+      try {
+        await deleteDoc(doc(db, 'clientes', id));
+        toast.success('Cliente excluído');
+      } catch (error) {
+        toast.error('Erro ao excluir cliente');
+      }
+    });
   };
 
   return (
