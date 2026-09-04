@@ -12,6 +12,14 @@ export default function Dashboard() {
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
   const [vendedora, setVendedora] = useState('');
 
+  const getSaudacao = () => {
+    const hora = new Date().getHours();
+    if (hora >= 0 && hora < 6) return 'Boa madrugada';
+    if (hora >= 6 && hora < 12) return 'Bom dia';
+    if (hora >= 12 && hora < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
   useEffect(() => {
     const nome = localStorage.getItem('vendedoraNome');
     if (nome) setVendedora(nome);
@@ -77,7 +85,7 @@ export default function Dashboard() {
   return (
     <div className="page-container">
       <header style={{ marginBottom: '24px' }}>
-        <h1 className="header-title">Bom dia{vendedora ? `, ${vendedora}` : ''}!</h1>
+        <h1 className="header-title">{getSaudacao()}{vendedora ? `, ${vendedora}` : ''}!</h1>
         <p className="subtitle">Aqui está o resumo das suas vendas.</p>
       </header>
 

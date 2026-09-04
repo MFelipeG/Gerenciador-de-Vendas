@@ -55,13 +55,7 @@ export default function Configuracoes() {
           />
         </div>
         
-        <div>
-           <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.4'}}>
-             A moeda do sistema já foi configurada para Euro (€) conforme solicitado.
-           </p>
-        </div>
-
-        <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>
+        <button type="submit" className="btn-primary" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           <Save size={20} /> Salvar Alterações
         </button>
       </form>
