@@ -98,8 +98,8 @@ export default function Dashboard() {
   };
 
   const handleWhatsApp = (venda) => {
-    const saudacao = vendedora ? `Olá, aqui é a ${vendedora}!` : `Olá!`;
-    const mensagem = `${saudacao} 🛍️ Passando para lembrar da sua comprinha de *${venda.produtoNome}* no valor de *€ ${venda.valor?.toFixed(2)}*. O acerto está previsto para ${formatarData(venda.dataPagamento)}. Muito obrigada pela preferência!`;
+    const saudacao = vendedora ? `Oii, aqui é a ${vendedora}! Tudo bem? ✨` : `Oii! Tudo bem? ✨`;
+    const mensagem = `${saudacao}\n\nPassando aqui com muito carinho para te lembrar do acerto do seu *${venda.produtoNome}* (Valor: *€ ${venda.valor?.toFixed(2)}*), que está previsto para dia *${formatarData(venda.dataPagamento)}*.\n\nQualquer dúvida me avisa, viu? Muito obrigada pela preferência de sempre! 💖🛍️`;
     const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
     window.open(url, '_blank');
   };

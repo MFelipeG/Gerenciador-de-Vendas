@@ -35,12 +35,14 @@ function BottomNav({ pendingCount }) {
           className={`nav-item ${location.pathname === item.path ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
           onClick={() => navigate(item.path)}
         >
-          {item.path === '/' && pendingCount > 0 && (
-            <span style={{ position: 'absolute', top: '8px', right: '16px', background: '#ff4a5a', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px' }}>
-              {pendingCount}
-            </span>
-          )}
-          {item.icon}
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+            {item.path === '/' && pendingCount > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-12px', background: '#ff4a5a', color: '#fff', fontSize: '0.65rem', fontWeight: 'bold', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                {pendingCount}
+              </span>
+            )}
+            {item.icon}
+          </div>
           {!item.highlight && <span>{item.label}</span>}
         </button>
       ))}
