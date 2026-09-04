@@ -131,7 +131,7 @@ export default function Dashboard() {
               <h4>{venda.clienteNome}</h4>
               <p>{venda.produtoNome}</p>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Prev. Pagamento: {formatarData(venda.dataPagamento)}
+                Compra: {formatarData(venda.dataVenda)} • Vence: {formatarData(venda.dataPagamento)}
               </p>
             </div>
             <div className="value" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>

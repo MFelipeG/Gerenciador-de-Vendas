@@ -12,6 +12,7 @@ export default function Clientes() {
   const [showForm, setShowForm] = useState(false);
   const [novoCliente, setNovoCliente] = useState({ nome: '', telefone: '' });
   const [clienteModal, setClienteModal] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const navigate = useNavigate();
 
@@ -74,7 +75,10 @@ export default function Clientes() {
     } catch (error) {
       toast.error('Erro ao atualizar pagamentos.');
     }
-  };
+  const filteredClientes = clientes.filter(c => 
+    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (c.telefone && c.telefone.includes(searchTerm))
+  );
 
   return (
     <div className="page-container" style={{ position: 'relative' }}>
@@ -112,12 +116,19 @@ export default function Clientes() {
 
       <div style={{ position: 'relative', marginBottom: '24px' }}>
         <Search size={20} style={{ position: 'absolute', left: '16px', top: '14px', color: 'var(--text-muted)' }} />
-        <input type="text" placeholder="Buscar cliente..." className="input-field" style={{ paddingLeft: '48px' }} />
+        <input 
+          type="text" 
+          placeholder="Buscar cliente..." 
+          className="input-field" 
+          style={{ paddingLeft: '48px' }} 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="clientes-list">
-        {clientes.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum cliente cadastrado.</p>}
-        {clientes.map(cliente => (
+        {filteredClientes.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum cliente encontrado.</p>}
+        {filteredClientes.map(cliente => (
           <div key={cliente.id} className="glass list-item" onClick={() => setClienteModal(cliente)} style={{ cursor: 'pointer' }}>
             <div className="avatar">{cliente.nome.charAt(0).toUpperCase()}</div>
             <div className="info">

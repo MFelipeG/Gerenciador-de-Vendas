@@ -8,8 +8,9 @@ import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateD
 export default function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [novoProduto, setNovoProduto] = useState({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
+  const [novoProduto, setNovoProduto] = useState({ nome: '', codigo: '', precoCusto: '', precoVenda: '', estoque: '' });
   const [lucroPadrao, setLucroPadrao] = useState(30);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const savedLucro = localStorage.getItem('lucroPadrao');
@@ -28,11 +29,12 @@ export default function Produtos() {
       try {
         await addDoc(collection(db, 'produtos'), {
           nome: novoProduto.nome,
+          codigo: novoProduto.codigo || '',
           precoCusto: parseFloat(novoProduto.precoCusto || 0),
           precoVenda: parseFloat(novoProduto.precoVenda || 0),
           estoque: parseInt(novoProduto.estoque || 0)
         });
-        setNovoProduto({ nome: '', precoCusto: '', precoVenda: '', estoque: '' });
+        setNovoProduto({ nome: '', codigo: '', precoCusto: '', precoVenda: '', estoque: '' });
         setShowForm(false);
         toast.success('Produto adicionado!');
       } catch (error) {
@@ -55,7 +57,9 @@ export default function Produtos() {
     } catch (error) {
       toast.error('Erro ao atualizar estoque');
     }
-  };
+    const term = searchTerm.toLowerCase();
+    return p.nome.toLowerCase().includes(term) || (p.codigo && p.codigo.toLowerCase().includes(term));
+  });
 
   return (
     <div className="page-container">
@@ -74,11 +78,18 @@ export default function Produtos() {
           <h3>Novo Produto</h3>
           <input 
             type="text" 
-            placeholder="Nome do Produto" 
+            placeholder="Nome do produto" 
             className="input-field" 
             value={novoProduto.nome} 
             onChange={(e) => setNovoProduto({...novoProduto, nome: e.target.value})} 
             required
+          />
+          <input 
+            type="text" 
+            placeholder="Código (opcional)" 
+            className="input-field" 
+            value={novoProduto.codigo} 
+            onChange={(e) => setNovoProduto({...novoProduto, codigo: e.target.value})} 
           />
           <div style={{ display: 'flex', gap: '12px' }}>
             <input 
@@ -117,18 +128,25 @@ export default function Produtos() {
 
       <div style={{ position: 'relative', marginBottom: '24px' }}>
         <Search size={20} style={{ position: 'absolute', left: '16px', top: '14px', color: 'var(--text-muted)' }} />
-        <input type="text" placeholder="Buscar produto..." className="input-field" style={{ paddingLeft: '48px' }} />
+        <input 
+          type="text" 
+          placeholder="Buscar produto ou código..." 
+          className="input-field" 
+          style={{ paddingLeft: '48px' }} 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="produtos-list">
-        {produtos.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum produto cadastrado.</p>}
-        {produtos.map(produto => (
+        {filteredProdutos.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhum produto encontrado.</p>}
+        {filteredProdutos.map(produto => (
           <div key={produto.id} className="glass list-item" style={{ alignItems: 'flex-start' }}>
             <div className="avatar" style={{ background: 'var(--bg-gradient-2)', borderRadius: '12px' }}>
                <PackagePlus size={20} color="var(--magenta)"/>
             </div>
             <div className="info">
-              <h4>{produto.nome}</h4>
+              <h4>{produto.nome} {produto.codigo && <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>#{produto.codigo}</span>}</h4>
               <p style={{ color: '#00e676', fontWeight: 'bold' }}>€ {produto.precoVenda?.toFixed(2)}</p>
               <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: € {produto.precoCusto?.toFixed(2)} • Lucro: € {(produto.precoVenda - produto.precoCusto)?.toFixed(2)}</p>
             </div>
