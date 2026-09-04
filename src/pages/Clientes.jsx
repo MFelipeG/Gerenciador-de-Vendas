@@ -52,7 +52,7 @@ export default function Clientes() {
   const handleWhatsApp = (tel) => {
     if (!tel) return toast.error('Cliente não possui telefone cadastrado.');
     const cleanTel = tel.replace(/\D/g, '');
-    window.open(`https://wa.me/55${cleanTel}`, '_blank');
+    window.open(`https://wa.me/351${cleanTel}`, '_blank');
   };
 
   const handleMarcarPago = async (clienteId) => {
