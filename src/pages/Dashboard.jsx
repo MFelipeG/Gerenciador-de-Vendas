@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { Calendar } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { Calendar, CheckCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import '../components.css';
 
 export default function Dashboard() {
@@ -44,9 +45,33 @@ export default function Dashboard() {
   const formatarData = (dataString) => {
     if (!dataString) return '';
     const data = new Date(dataString);
-    // Adicionar fuso horário para evitar mostrar o dia anterior
     data.setMinutes(data.getMinutes() + data.getTimezoneOffset());
     return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  };
+
+  const getStatusInfo = (venda) => {
+    if (venda.status === 'pago') return { texto: 'Pago', cor: '#00e676' };
+    if (!venda.dataPagamento) return { texto: 'Pendente', cor: 'var(--orange)' };
+
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    
+    const dataPg = new Date(venda.dataPagamento);
+    dataPg.setMinutes(dataPg.getMinutes() + dataPg.getTimezoneOffset());
+    dataPg.setHours(0,0,0,0);
+
+    if (dataPg > hoje) return { texto: 'No Prazo', cor: '#00e676' }; // verde
+    if (dataPg.getTime() === hoje.getTime()) return { texto: 'Vence Hoje', cor: 'var(--orange)' }; // laranja
+    return { texto: 'Atrasado', cor: '#ff4a5a' }; // vermelho
+  };
+
+  const handleMarcarPago = async (id) => {
+    try {
+      await updateDoc(doc(db, 'vendas', id), { status: 'pago' });
+      toast.success('Venda marcada como paga!');
+    } catch (error) {
+      toast.error('Erro ao atualizar pagamento.');
+    }
   };
 
   return (
@@ -105,15 +130,23 @@ export default function Dashboard() {
             <div className="info">
               <h4>{venda.clienteNome}</h4>
               <p>{venda.produtoNome}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--orange)', marginTop: '4px' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Prev. Pagamento: {formatarData(venda.dataPagamento)}
               </p>
             </div>
-            <div className="value">
+            <div className="value" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
               <h4>€ {venda.valor?.toFixed(2)}</h4>
-              <p style={{ color: venda.status === 'pendente' ? '#ff4a5a' : '#00e676' }}>
-                {venda.status === 'pendente' ? 'Pendente' : 'Pago'}
+              <p style={{ color: getStatusInfo(venda).cor, fontWeight: 'bold', fontSize: '0.85rem' }}>
+                {getStatusInfo(venda).texto}
               </p>
+              {venda.status !== 'pago' && (
+                <button 
+                  onClick={() => handleMarcarPago(venda.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #00e676', color: '#00e676', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
+                >
+                  <CheckCircle size={14} /> Receber
+                </button>
+              )}
             </div>
           </div>
         ))}
