@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { PackagePlus, Search, Edit2, Trash2 } from 'lucide-react';
+import { PackagePlus, Search, Edit2, Trash2, Plus, Minus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { toastConfirm } from '../utils/toastConfirm';
 import { db } from '../firebase';
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, updateDoc } from 'firebase/firestore';
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState([]);
@@ -42,6 +42,15 @@ export default function Produtos() {
       await deleteDoc(doc(db, 'produtos', id));
       toast.success('Produto excluído');
     });
+  };
+
+  const handleUpdateEstoque = async (id, novoEstoque) => {
+    if (novoEstoque < 0) return;
+    try {
+      await updateDoc(doc(db, 'produtos', id), { estoque: novoEstoque });
+    } catch (error) {
+      toast.error('Erro ao atualizar estoque');
+    }
   };
 
   return (
@@ -112,10 +121,14 @@ export default function Produtos() {
               <p style={{ fontSize: '0.75rem', marginTop: '4px' }}>Custo: € {produto.precoCusto?.toFixed(2)} • Lucro: € {(produto.precoVenda - produto.precoCusto)?.toFixed(2)}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-end' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '8px' }}>
+                <button onClick={() => handleUpdateEstoque(produto.id, produto.estoque - 1)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}><Minus size={16} /></button>
+                <span style={{ fontSize: '0.9rem', width: '20px', textAlign: 'center' }}>{produto.estoque || 0}</span>
+                <button onClick={() => handleUpdateEstoque(produto.id, (produto.estoque || 0) + 1)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}><Plus size={16} /></button>
+              </div>
               <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)' }}>
                 <Trash2 size={18} style={{ cursor: 'pointer', color: '#ff4a5a' }} onClick={() => handleExcluir(produto.id)} />
               </div>
-              <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '8px' }}>Estoque: {produto.estoque}</span>
             </div>
           </div>
         ))}
