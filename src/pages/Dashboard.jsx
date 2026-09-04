@@ -11,6 +11,19 @@ export default function Dashboard() {
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth());
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
   const [vendedora, setVendedora] = useState('');
+  const [fraseMotivacional, setFraseMotivacional] = useState('');
+
+  const frases = [
+    "O sucesso é a soma de pequenos esforços.",
+    "Acredite e você já estará no meio do caminho.",
+    "Grandes coisas nunca vêm da zona de conforto.",
+    "O otimismo é a fé em ação.",
+    "Cada venda é um degrau para o topo.",
+    "Seu único limite é a sua própria mente.",
+    "Aja como se o que você faz fizesse diferença. E faz.",
+    "Não espere por oportunidades, crie-as.",
+    "Hoje é um ótimo dia para bater metas!"
+  ];
 
   const getSaudacao = () => {
     const hora = new Date().getHours();
@@ -23,6 +36,7 @@ export default function Dashboard() {
   useEffect(() => {
     const nome = localStorage.getItem('vendedoraNome');
     if (nome) setVendedora(nome);
+    setFraseMotivacional(frases[Math.floor(Math.random() * frases.length)]);
   }, []);
 
   useEffect(() => {
@@ -84,9 +98,16 @@ export default function Dashboard() {
 
   return (
     <div className="page-container">
-      <header style={{ marginBottom: '24px' }}>
-        <h1 className="header-title">{getSaudacao()}{vendedora ? `, ${vendedora}` : ''}!</h1>
-        <p className="subtitle">Aqui está o resumo das suas vendas.</p>
+      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+        <div>
+          <h1 className="header-title">{getSaudacao()}{vendedora ? `, ${vendedora}` : ''}!</h1>
+          <p className="subtitle">Aqui está o resumo das suas vendas.</p>
+        </div>
+        
+        <div style={{ maxWidth: '40%', textAlign: 'right', background: 'var(--bg-gradient-2)', padding: '10px 14px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+          <p style={{ fontSize: '0.65rem', color: 'var(--magenta)', fontWeight: 'bold', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💡 Inspiração</p>
+          <p style={{ fontSize: '0.75rem', fontStyle: 'italic', lineHeight: '1.3' }}>"{fraseMotivacional}"</p>
+        </div>
       </header>
 
       {/* Seletor de Mês */}
