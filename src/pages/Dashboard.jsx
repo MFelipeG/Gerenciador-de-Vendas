@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
-import { Calendar, CheckCircle, MessageCircle } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Calendar, CheckCircle, MessageCircle, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import '../components.css';
@@ -108,9 +108,20 @@ export default function Dashboard() {
   const handleMarcarPago = async (id) => {
     try {
       await updateDoc(doc(db, 'vendas', id), { status: 'pago' });
-      toast.success('Venda marcada como paga!');
+      toast.success('Oba! Pagamento recebido!');
     } catch (error) {
       toast.error('Erro ao atualizar pagamento.');
+    }
+  };
+
+  const handleExcluir = async (id) => {
+    if (window.confirm('Tem certeza que deseja excluir esta venda?')) {
+      try {
+        await deleteDoc(doc(db, 'vendas', id));
+        toast.success('Venda excluída!');
+      } catch (error) {
+        toast.error('Erro ao excluir venda.');
+      }
     }
   };
 
@@ -238,7 +249,7 @@ export default function Dashboard() {
               <p style={{ color: getStatusInfo(venda).cor, fontWeight: 'bold', fontSize: '0.85rem' }}>
                 {getStatusInfo(venda).texto}
               </p>
-              {venda.status !== 'pago' && (
+              {venda.status !== 'pago' ? (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button 
                     onClick={() => handleWhatsApp(venda)}
@@ -252,7 +263,20 @@ export default function Dashboard() {
                   >
                     <CheckCircle size={14} /> Receber
                   </button>
+                  <button 
+                    onClick={() => handleExcluir(venda.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #ff4a5a', color: '#ff4a5a', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
+                  >
+                    <Trash2 size={14} /> Excluir
+                  </button>
                 </div>
+              ) : (
+                <button 
+                  onClick={() => handleExcluir(venda.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #ff4a5a', color: '#ff4a5a', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', marginTop: '4px' }}
+                >
+                  <Trash2 size={14} /> Excluir
+                </button>
               )}
             </div>
           </motion.div>
