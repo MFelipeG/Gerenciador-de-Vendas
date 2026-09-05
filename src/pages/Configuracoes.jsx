@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Save, User, Percent, Download, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import '../components.css';
@@ -99,7 +99,7 @@ export default function Configuracoes() {
       doc.text(`Margem de Lucro: ${margem}%`, 100, 67);
 
       // Tabela
-      doc.autoTable({
+      autoTable(doc, {
         startY: 75,
         head: [['Cliente', 'Produto', 'Valor', 'Lucro', 'Data Compra', 'Previsão', 'Status']],
         body: linhasTabela,

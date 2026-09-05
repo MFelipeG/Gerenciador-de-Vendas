@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Search, MessageCircle, ShoppingBag, CheckCircle, X, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -134,7 +134,7 @@ export default function Clientes() {
       docPdf.setTextColor(255, 74, 90);
       docPdf.text(`Valor Pendente (A Pagar): € ${tPendente.toFixed(2)}`, 14, 67);
 
-      docPdf.autoTable({
+      autoTable(docPdf, {
         startY: 75,
         head: [['Produto', 'Valor', 'Data Compra', 'Previsão Pgto', 'Status']],
         body: linhasTabela,
