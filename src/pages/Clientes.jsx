@@ -84,9 +84,16 @@ export default function Clientes() {
   const handleGerarExtrato = async (cliente) => {
     try {
       toast.loading('Gerando extrato...', { id: 'pdf-cliente' });
-      const q = query(collection(db, 'vendas'), where('clienteId', '==', cliente.id), orderBy('dataVenda', 'desc'));
+      const q = query(collection(db, 'vendas'), where('clienteId', '==', cliente.id));
       const querySnapshot = await getDocs(q);
-      const vendasDoCliente = querySnapshot.docs.map(d => d.data());
+      let vendasDoCliente = querySnapshot.docs.map(d => d.data());
+      
+      // Ordenação local (descendente por dataVenda)
+      vendasDoCliente.sort((a, b) => {
+        const dataA = a.dataVenda ? new Date(a.dataVenda).getTime() : 0;
+        const dataB = b.dataVenda ? new Date(b.dataVenda).getTime() : 0;
+        return dataB - dataA;
+      });
 
       if (vendasDoCliente.length === 0) {
         toast.error('Nenhuma compra encontrada para este cliente.', { id: 'pdf-cliente' });
