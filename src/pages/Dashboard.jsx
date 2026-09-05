@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
   const [vendedora, setVendedora] = useState('');
   const [fraseMotivacional, setFraseMotivacional] = useState('');
+  const [gastoTotal, setGastoTotal] = useState(0);
 
   const frases = [
     "O sucesso é a soma de pequenos esforços.",
@@ -54,8 +55,18 @@ export default function Dashboard() {
 
       setVendas(filteredVendas);
       
-      const totalLucro = filteredVendas.reduce((acc, curr) => acc + (curr.lucro || 0), 0);
-      setLucroTotal(totalLucro);
+      let tLucro = 0;
+      let tGasto = 0;
+      filteredVendas.forEach(curr => {
+        const lucro = curr.lucro || 0;
+        const valor = curr.valor || 0;
+        const gasto = valor - lucro;
+        tLucro += lucro;
+        tGasto += gasto;
+      });
+      
+      setLucroTotal(tLucro);
+      setGastoTotal(tGasto);
     });
     return () => unsubscribe();
   }, [mesSelecionado, anoSelecionado]);
@@ -166,8 +177,22 @@ export default function Dashboard() {
 
       <section className="glass dashboard-card" style={{ padding: '24px', marginBottom: '30px' }}>
         <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Lucro do Mês</h3>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '16px' }}>
           <h2 className="text-gradient" style={{ fontSize: '2.5rem', lineHeight: '1' }}>€ {lucroTotal.toFixed(2)}</h2>
+          <span style={{ padding: '4px 8px', background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '4px' }}>
+            {((gastoTotal + lucroTotal) > 0 ? (lucroTotal / (gastoTotal + lucroTotal) * 100) : 0).toFixed(1)}% Margem
+          </span>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+          <div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Gasto (Compras)</p>
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#ff4a5a' }}>€ {gastoTotal.toFixed(2)}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Faturamento</p>
+            <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff' }}>€ {(gastoTotal + lucroTotal).toFixed(2)}</p>
+          </div>
         </div>
       </section>
 
