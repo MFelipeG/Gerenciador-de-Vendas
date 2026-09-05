@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -113,15 +113,15 @@ function App() {
 
   if (!user) {
     return (
-      <BrowserRouter>
+      <HashRouter>
         <Toaster position="top-center" />
         <Login />
-      </BrowserRouter>
+      </HashRouter>
     );
   }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="bg-orbs" />
       <Toaster position="top-center" toastOptions={{
         style: {
@@ -135,7 +135,7 @@ function App() {
       }} />
       <AnimatedRoutes />
       <BottomNav pendingCount={pendingCount} />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
