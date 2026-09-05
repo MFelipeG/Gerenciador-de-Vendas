@@ -4,27 +4,34 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { LogOut } from 'lucide-react';
 import '../components.css';
 
 export default function Configuracoes() {
-  const [nome, setNome] = useState('');
+  const user = auth.currentUser;
   const [lucroPadrao, setLucroPadrao] = useState(30);
 
   useEffect(() => {
-    const savedName = localStorage.getItem('vendedoraNome');
-    if (savedName) setNome(savedName);
-    
     const savedLucro = localStorage.getItem('lucroPadrao');
     if (savedLucro) setLucroPadrao(savedLucro);
   }, []);
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    localStorage.setItem('vendedoraNome', nome);
     localStorage.setItem('lucroPadrao', lucroPadrao);
     toast.success('Configurações salvas com sucesso!');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success('Você saiu da sua conta.');
+    } catch (error) {
+      toast.error('Erro ao sair da conta.');
+    }
   };
 
   const gerarRelatorioMensal = async () => {
@@ -82,7 +89,7 @@ export default function Configuracoes() {
       doc.text('Relatório de Vendas', 14, 22);
       
       doc.setFontSize(12);
-      doc.text(`${mesesStr[mesAtual]} de ${anoAtual} | Vendedora: ${nome || 'Não informado'}`, 14, 30);
+      doc.text(`${mesesStr[mesAtual]} de ${anoAtual} | Vendedora: ${user?.displayName || 'Vendedora'}`, 14, 30);
 
       // Resumo financeiro
       doc.setTextColor(0, 0, 0);
@@ -127,20 +134,26 @@ export default function Configuracoes() {
         <p className="subtitle">Ajuste as preferências do seu app</p>
       </header>
 
-      <form onSubmit={handleSalvar} className="glass" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div>
-          <label style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', color: 'var(--text-muted)' }}>
-            <User size={18} /> Seu Nome (Vendedora)
-          </label>
-          <input 
-            type="text" 
-            className="input-field" 
-            placeholder="Como quer ser chamada?" 
-            value={nome} 
-            onChange={e => setNome(e.target.value)} 
-          />
+      {user && (
+        <div className="glass" style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {user.photoURL ? (
+              <img src={user.photoURL} alt="Perfil" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)' }} />
+            ) : (
+              <User size={32} color="var(--magenta)" />
+            )}
+            <div>
+              <p style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{user.displayName}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{user.email}</p>
+            </div>
+          </div>
+          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <LogOut size={18} color="#ff4a5a" /> Sair
+          </button>
         </div>
-        
+      )}
+
+      <form onSubmit={handleSalvar} className="glass" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div>
           <label style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', color: 'var(--text-muted)' }}>
             <Percent size={18} /> Margem de Lucro Padrão (%)

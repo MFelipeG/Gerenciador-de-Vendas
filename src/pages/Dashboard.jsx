@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { Calendar, CheckCircle, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,7 +11,10 @@ export default function Dashboard() {
   const [lucroTotal, setLucroTotal] = useState(0);
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth());
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
-  const [vendedora, setVendedora] = useState('');
+  
+  const user = auth.currentUser;
+  const [vendedora, setVendedora] = useState(user?.displayName?.split(' ')[0] || '');
+  const userPhoto = user?.photoURL;
   const [fraseMotivacional, setFraseMotivacional] = useState('');
   const [gastoTotal, setGastoTotal] = useState(0);
 
@@ -35,18 +38,21 @@ export default function Dashboard() {
     return 'Boa noite';
   };
 
+  const saudacao = getSaudacao();
+
   useEffect(() => {
-    const nome = localStorage.getItem('vendedoraNome');
-    if (nome) setVendedora(nome);
     setFraseMotivacional(frases[Math.floor(Math.random() * frases.length)]);
-  }, []);
+    if (!user) {
+      const savedName = localStorage.getItem('vendedoraNome');
+      if (savedName) setVendedora(savedName);
+    }
+  }, [user]);
 
   useEffect(() => {
     const q = query(collection(db, 'vendas'), orderBy('dataVenda', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const allVendas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      // Filter by selected month and year
       const filteredVendas = allVendas.filter(venda => {
         if (!venda.dataVenda) return false;
         const data = new Date(venda.dataVenda);
@@ -94,9 +100,9 @@ export default function Dashboard() {
     dataPg.setMinutes(dataPg.getMinutes() + dataPg.getTimezoneOffset());
     dataPg.setHours(0,0,0,0);
 
-    if (dataPg > hoje) return { texto: 'No Prazo', cor: '#00e676' }; // verde
-    if (dataPg.getTime() === hoje.getTime()) return { texto: 'Vence Hoje', cor: 'var(--orange)' }; // laranja
-    return { texto: 'Atrasado', cor: '#ff4a5a' }; // vermelho
+    if (dataPg > hoje) return { texto: 'No Prazo', cor: '#00e676' };
+    if (dataPg.getTime() === hoje.getTime()) return { texto: 'Vence Hoje', cor: 'var(--orange)' };
+    return { texto: 'Atrasado', cor: '#ff4a5a' };
   };
 
   const handleMarcarPago = async (id) => {
@@ -109,15 +115,15 @@ export default function Dashboard() {
   };
 
   const handleWhatsApp = (venda) => {
-    const saudacao = vendedora ? `Oii, aqui é a ${vendedora}! Tudo bem? ` : `Oii! Tudo bem? `;
-    const parte1 = encodeURIComponent(saudacao);
-    const emoji1 = '%E2%9C%A8'; // brilho
+    const saudacaoWpp = vendedora ? `Oii, aqui é a ${vendedora}! Tudo bem? ` : `Oii! Tudo bem? `;
+    const parte1 = encodeURIComponent(saudacaoWpp);
+    const emoji1 = '%E2%9C%A8';
     
     const texto2 = `\n\nPassando aqui com muito carinho para te lembrar do acerto do seu *${venda.produtoNome}* (Valor: *€ ${venda.valor?.toFixed(2)}*), que está previsto para dia *${formatarData(venda.dataPagamento)}*.\n\nQualquer dúvida me avisa, viu? Muito obrigada pela preferência de sempre! `;
     const parte2 = encodeURIComponent(texto2);
     
-    const emoji2 = '%F0%9F%92%96'; // coracao
-    const emoji3 = '%F0%9F%9B%8D%EF%B8%8F'; // sacola
+    const emoji2 = '%F0%9F%92%96';
+    const emoji3 = '%F0%9F%9B%8D%EF%B8%8F';
     
     const url = `https://wa.me/?text=${parte1}${emoji1}${parte2}${emoji2}${emoji3}`;
     window.open(url, '_blank');
@@ -134,19 +140,24 @@ export default function Dashboard() {
       className="page-container"
       initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ duration: 0.3 }}
     >
-      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-        <div>
-          <h1 className="header-title">{getSaudacao()}{vendedora ? `, ${vendedora}` : ''}!</h1>
-          <p className="subtitle">Aqui está o resumo das suas vendas.</p>
-        </div>
-        
-        <div style={{ maxWidth: '40%', textAlign: 'right', background: 'var(--bg-gradient-2)', padding: '10px 14px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
-          <p style={{ fontSize: '0.65rem', color: 'var(--magenta)', fontWeight: 'bold', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💡 Inspiração</p>
-          <p style={{ fontSize: '0.75rem', fontStyle: 'italic', lineHeight: '1.3' }}>"{fraseMotivacional}"</p>
+      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {userPhoto ? (
+            <img src={userPhoto} alt="Perfil" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--purple), var(--magenta))', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {vendedora ? vendedora.charAt(0).toUpperCase() : 'M'}
+            </div>
+          )}
+          <div>
+            <h1 className="header-title" style={{ fontSize: '1.2rem' }}>
+              {saudacao}, {vendedora || 'Vendedora'}!
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px', fontStyle: 'italic' }}>"{fraseMotivacional}"</p>
+          </div>
         </div>
       </header>
 
-      {/* Seletor de Mês */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
         <Calendar size={18} color="var(--magenta)" />
         <select 

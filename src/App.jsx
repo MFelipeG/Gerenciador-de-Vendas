@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from './firebase';
-import { Home, Users, PlusCircle, Package, Settings } from 'lucide-react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from './firebase';
+import { Home, Users, PlusCircle, Package, Settings, Loader2 } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import Produtos from './pages/Produtos';
 import NovaVenda from './pages/NovaVenda';
 import Configuracoes from './pages/Configuracoes';
+import Login from './pages/Login';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 import './components.css';
@@ -67,8 +69,21 @@ function AnimatedRoutes() {
 
 function App() {
   const [pendingCount, setPendingCount] = useState(0);
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
   useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
+    
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    
     const unsubscribe = onSnapshot(collection(db, 'vendas'), (snapshot) => {
       const allVendas = snapshot.docs.map(doc => doc.data());
       const hoje = new Date();
@@ -85,8 +100,26 @@ function App() {
       });
       setPendingCount(count);
     });
+    });
     return () => unsubscribe();
-  }, []);
+  }, [user]);
+
+  if (loadingAuth) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-dark)' }}>
+        <Loader2 className="animate-spin text-magenta" size={48} color="var(--magenta)" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <BrowserRouter>
+        <Toaster position="top-center" />
+        <Login />
+      </BrowserRouter>
+    );
+  }
 
   return (
     <BrowserRouter>
