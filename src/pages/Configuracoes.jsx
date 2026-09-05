@@ -138,7 +138,7 @@ export default function Configuracoes() {
         <div className="glass" style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Perfil" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)' }} />
+              <img src={user.photoURL} alt="Perfil" referrerPolicy="no-referrer" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)' }} />
             ) : (
               <User size={32} color="var(--magenta)" />
             )}

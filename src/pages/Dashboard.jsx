@@ -140,10 +140,10 @@ export default function Dashboard() {
       className="page-container"
       initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ duration: 0.3 }}
     >
-      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {userPhoto ? (
-            <img src={userPhoto} alt="Perfil" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)', objectFit: 'cover' }} />
+            <img src={userPhoto} alt="Perfil" referrerPolicy="no-referrer" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid var(--magenta)', objectFit: 'cover' }} />
           ) : (
             <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--purple), var(--magenta))', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>
               {vendedora ? vendedora.charAt(0).toUpperCase() : 'M'}
@@ -153,8 +153,13 @@ export default function Dashboard() {
             <h1 className="header-title" style={{ fontSize: '1.2rem' }}>
               {saudacao}, {vendedora || 'Vendedora'}!
             </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px', fontStyle: 'italic' }}>"{fraseMotivacional}"</p>
+            <p className="subtitle" style={{ fontSize: '0.85rem' }}>Resumo das suas vendas.</p>
           </div>
+        </div>
+
+        <div style={{ maxWidth: '45%', textAlign: 'right', background: 'var(--bg-gradient-2)', padding: '10px 14px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+          <p style={{ fontSize: '0.65rem', color: 'var(--magenta)', fontWeight: 'bold', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>💡 Inspiração</p>
+          <p style={{ fontSize: '0.75rem', fontStyle: 'italic', lineHeight: '1.3' }}>"{fraseMotivacional}"</p>
         </div>
       </header>
 
