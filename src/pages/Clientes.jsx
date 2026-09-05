@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Trash2, Search, MessageCircle, ShoppingBag, CheckCircle, X } from 'lucide-react';
+import { UserPlus, Trash2, Search, MessageCircle, ShoppingBag, CheckCircle, X, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
@@ -63,18 +65,90 @@ export default function Clientes() {
       const snapshot = await getDocs(q);
       
       if (snapshot.empty) {
-        toast.success('Este cliente não tem vendas pendentes de pagamento!');
+        toast('Nenhuma pendência encontrada para este cliente.');
         return;
       }
+
+      const promises = snapshot.docs.map(vendaDoc => 
+        updateDoc(doc(db, 'vendas', vendaDoc.id), { status: 'pago' })
+      );
       
-      snapshot.docs.forEach(async (d) => {
-        await updateDoc(doc(db, 'vendas', d.id), { status: 'pago' });
-      });
-      
-      toast.success('Todas as pendências deste cliente foram marcadas como pagas!');
+      await Promise.all(promises);
+      toast.success('Todas as pendências foram quitadas!');
       setClienteModal(null);
     } catch (error) {
-      toast.error('Erro ao atualizar pagamentos.');
+      toast.error('Erro ao quitar pendências.');
+    }
+  };
+
+  const handleGerarExtrato = async (cliente) => {
+    try {
+      toast.loading('Gerando extrato...', { id: 'pdf-cliente' });
+      const q = query(collection(db, 'vendas'), where('clienteId', '==', cliente.id), orderBy('dataVenda', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const vendasDoCliente = querySnapshot.docs.map(d => d.data());
+
+      if (vendasDoCliente.length === 0) {
+        toast.error('Nenhuma compra encontrada para este cliente.', { id: 'pdf-cliente' });
+        return;
+      }
+
+      let tGasto = 0, tPendente = 0;
+      const linhasTabela = vendasDoCliente.map(v => {
+        const valor = v.valor || 0;
+        tGasto += valor;
+        if (v.status !== 'pago') tPendente += valor;
+
+        const dataVenda = v.dataVenda ? new Date(v.dataVenda).toLocaleDateString('pt-BR') : '';
+        const dataPg = v.dataPagamento ? new Date(v.dataPagamento).toLocaleDateString('pt-BR') : '';
+        
+        return [
+          v.produtoNome,
+          `€ ${valor.toFixed(2)}`,
+          dataVenda,
+          dataPg,
+          v.status === 'pago' ? 'Pago' : 'Pendente'
+        ];
+      });
+
+      const docPdf = new jsPDF();
+      const vendedoraNome = localStorage.getItem('vendedoraNome') || 'Sua Loja';
+      
+      docPdf.setFillColor(30, 20, 50);
+      docPdf.rect(0, 0, 210, 40, 'F');
+      
+      docPdf.setTextColor(255, 255, 255);
+      docPdf.setFontSize(22);
+      docPdf.text('Extrato do Cliente', 14, 22);
+      
+      docPdf.setFontSize(12);
+      docPdf.text(`Cliente: ${cliente.nome} | Emitido por: ${vendedoraNome}`, 14, 30);
+
+      docPdf.setTextColor(0, 0, 0);
+      docPdf.setFontSize(14);
+      docPdf.text('Resumo da Conta', 14, 50);
+      
+      docPdf.setFontSize(11);
+      docPdf.setTextColor(80, 80, 80);
+      docPdf.text(`Total em Compras: € ${tGasto.toFixed(2)}`, 14, 60);
+      docPdf.setTextColor(255, 74, 90);
+      docPdf.text(`Valor Pendente (A Pagar): € ${tPendente.toFixed(2)}`, 14, 67);
+
+      docPdf.autoTable({
+        startY: 75,
+        head: [['Produto', 'Valor', 'Data Compra', 'Previsão Pgto', 'Status']],
+        body: linhasTabela,
+        headStyles: { fillColor: [232, 28, 255], textColor: [255, 255, 255] },
+        styles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [245, 245, 245] }
+      });
+
+      docPdf.save(`Extrato_${cliente.nome.replace(/\s+/g, '_')}.pdf`);
+      toast.success('Extrato gerado com sucesso!', { id: 'pdf-cliente' });
+      
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao gerar extrato.', { id: 'pdf-cliente' });
     }
   };
 
@@ -169,6 +243,10 @@ export default function Clientes() {
               
               <button className="btn-primary" onClick={() => navigate('/nova-venda')}>
                 <ShoppingBag size={20} /> Nova Venda
+              </button>
+
+              <button className="btn-primary" style={{ background: 'var(--purple)' }} onClick={() => handleGerarExtrato(clienteModal)}>
+                <FileText size={20} /> Gerar Extrato (PDF)
               </button>
               
               <button className="btn-primary" style={{ background: 'var(--orange)' }} onClick={() => handleMarcarPago(clienteModal.id)}>
