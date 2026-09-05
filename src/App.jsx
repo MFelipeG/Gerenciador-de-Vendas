@@ -100,7 +100,6 @@ function App() {
       });
       setPendingCount(count);
     });
-    });
     return () => unsubscribe();
   }, [user]);
 
