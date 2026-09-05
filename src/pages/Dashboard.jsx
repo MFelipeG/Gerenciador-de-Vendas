@@ -98,9 +98,17 @@ export default function Dashboard() {
   };
 
   const handleWhatsApp = (venda) => {
-    const saudacao = vendedora ? `Oii, aqui é a ${vendedora}! Tudo bem? \u2728` : `Oii! Tudo bem? \u2728`;
-    const mensagem = `${saudacao}\n\nPassando aqui com muito carinho para te lembrar do acerto do seu *${venda.produtoNome}* (Valor: *€ ${venda.valor?.toFixed(2)}*), que está previsto para dia *${formatarData(venda.dataPagamento)}*.\n\nQualquer dúvida me avisa, viu? Muito obrigada pela preferência de sempre! \uD83D\uDC96\uD83D\uDECD`;
-    const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+    const saudacao = vendedora ? `Oii, aqui é a ${vendedora}! Tudo bem? ` : `Oii! Tudo bem? `;
+    const parte1 = encodeURIComponent(saudacao);
+    const emoji1 = '%E2%9C%A8'; // brilho
+    
+    const texto2 = `\n\nPassando aqui com muito carinho para te lembrar do acerto do seu *${venda.produtoNome}* (Valor: *€ ${venda.valor?.toFixed(2)}*), que está previsto para dia *${formatarData(venda.dataPagamento)}*.\n\nQualquer dúvida me avisa, viu? Muito obrigada pela preferência de sempre! `;
+    const parte2 = encodeURIComponent(texto2);
+    
+    const emoji2 = '%F0%9F%92%96'; // coracao
+    const emoji3 = '%F0%9F%9B%8D%EF%B8%8F'; // sacola
+    
+    const url = `https://wa.me/?text=${parte1}${emoji1}${parte2}${emoji2}${emoji3}`;
     window.open(url, '_blank');
   };
 
