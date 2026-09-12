@@ -131,8 +131,9 @@ function App() {
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '16px'
         },
-        success: { iconTheme: { primary: '#e81cff', secondary: '#fff' } }
-      }} />
+        success: { iconTheme: { primary: '#e81cff', secondary: '#fff' } },
+        duration: 3000
+      }} maxCount={1} />
       <AnimatedRoutes />
       <BottomNav pendingCount={pendingCount} />
     </HashRouter>

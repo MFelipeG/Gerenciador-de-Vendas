@@ -111,7 +111,7 @@ export default function Clientes() {
         
         return [
           v.produtoNome,
-          `€ ${valor.toFixed(2)}`,
+          `EUR ${valor.toFixed(2)}`,
           dataVenda,
           dataPg,
           v.status === 'pago' ? 'Pago' : 'Pendente'
@@ -137,9 +137,9 @@ export default function Clientes() {
       
       docPdf.setFontSize(11);
       docPdf.setTextColor(80, 80, 80);
-      docPdf.text(`Total em Compras: € ${tGasto.toFixed(2)}`, 14, 60);
-      docPdf.setTextColor(255, 74, 90);
-      docPdf.text(`Valor Pendente (A Pagar): € ${tPendente.toFixed(2)}`, 14, 67);
+      docPdf.text(`Total em Compras: EUR ${tGasto.toFixed(2)}`, 14, 60);
+      docPdf.setTextColor(255, 74, 90); // red
+      docPdf.text(`Valor Pendente (A Pagar): EUR ${tPendente.toFixed(2)}`, 14, 67);
 
       autoTable(docPdf, {
         startY: 75,

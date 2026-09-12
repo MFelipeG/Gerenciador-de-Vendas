@@ -71,8 +71,8 @@ export default function Configuracoes() {
         return [
           v.clienteNome,
           v.produtoNome,
-          `€ ${valor.toFixed(2)}`,
-          `€ ${lucro.toFixed(2)}`,
+          `EUR ${valor.toFixed(2)}`,
+          `EUR ${lucro.toFixed(2)}`,
           dataVenda,
           dataPg,
           v.status === 'pago' ? 'Pago' : 'Pendente'
@@ -98,9 +98,9 @@ export default function Configuracoes() {
       
       doc.setFontSize(11);
       doc.setTextColor(80, 80, 80);
-      doc.text(`Faturamento Bruto: € ${tFaturamento.toFixed(2)}`, 14, 60);
-      doc.text(`Gasto (Compras): € ${tGasto.toFixed(2)}`, 14, 67);
-      doc.text(`Lucro Líquido: € ${tLucro.toFixed(2)}`, 100, 60);
+      doc.text(`Faturamento Bruto: EUR ${tFaturamento.toFixed(2)}`, 14, 60);
+      doc.text(`Gasto (Compras): EUR ${tGasto.toFixed(2)}`, 14, 67);
+      doc.text(`Lucro Liquido: EUR ${tLucro.toFixed(2)}`, 100, 60);
       
       const margem = tFaturamento > 0 ? ((tLucro / tFaturamento) * 100).toFixed(1) : 0;
       doc.text(`Margem de Lucro: ${margem}%`, 100, 67);

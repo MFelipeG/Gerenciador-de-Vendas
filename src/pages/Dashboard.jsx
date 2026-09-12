@@ -8,6 +8,7 @@ import '../components.css';
 
 export default function Dashboard() {
   const [vendas, setVendas] = useState([]);
+  const [recebimentos, setRecebimentos] = useState([]);
   const [lucroTotal, setLucroTotal] = useState(0);
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth());
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
@@ -59,7 +60,21 @@ export default function Dashboard() {
         return data.getMonth() === parseInt(mesSelecionado) && data.getFullYear() === parseInt(anoSelecionado);
       });
 
+      const filteredRecebimentos = allVendas.filter(venda => {
+        if (!venda.dataPagamento) return false;
+        const dataPag = new Date(venda.dataPagamento);
+        const dataVenda = venda.dataVenda ? new Date(venda.dataVenda) : null;
+        
+        // Se a venda e o pagamento são no mesmo mês, ela já aparece em Vendas Realizadas, então ignoramos aqui
+        if (dataVenda && dataVenda.getMonth() === dataPag.getMonth() && dataVenda.getFullYear() === dataPag.getFullYear()) {
+          return false;
+        }
+        
+        return dataPag.getMonth() === parseInt(mesSelecionado) && dataPag.getFullYear() === parseInt(anoSelecionado);
+      });
+
       setVendas(filteredVendas);
+      setRecebimentos(filteredRecebimentos);
       
       let tLucro = 0;
       let tGasto = 0;
@@ -225,10 +240,10 @@ export default function Dashboard() {
 
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3>Vendas de {meses[mesSelecionado]}</h3>
+          <h3>Vendas Realizadas ({meses[mesSelecionado]})</h3>
         </div>
         <div className="vendas-list">
-        {vendas.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center'}}>Nenhuma venda este mês.</p>}
+        {vendas.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem'}}>Nenhuma venda este mês.</p>}
         {vendas.map((venda, index) => (
           <motion.div 
             key={venda.id} 
@@ -278,6 +293,43 @@ export default function Dashboard() {
                   <Trash2 size={14} /> Excluir
                 </button>
               )}
+            </div>
+          </motion.div>
+        ))}
+        </div>
+      </section>
+
+      <section style={{ marginTop: '32px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--orange)' }}>A Receber ({meses[mesSelecionado]})</h3>
+        </div>
+        <div className="vendas-list">
+        {recebimentos.length === 0 && <p style={{color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem'}}>Nenhum recebimento pendente de meses anteriores.</p>}
+        {recebimentos.map((venda, index) => (
+          <motion.div 
+            key={`rec-${venda.id}`} 
+            className="glass list-item"
+            style={{ borderLeft: '3px solid var(--orange)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <div className="info">
+              <h4>{venda.clienteNome}</h4>
+              <p>{venda.produtoNome}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Vendido em: {formatarData(venda.dataVenda)} • <span style={{ color: 'var(--orange)', fontWeight: 'bold' }}>Vence: {formatarData(venda.dataPagamento)}</span>
+              </p>
+            </div>
+            <div className="value" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+              <h4>€ {venda.valor?.toFixed(2)}</h4>
+              <p style={{ color: getStatusInfo(venda).cor, fontWeight: 'bold', fontSize: '0.85rem' }}>
+                {getStatusInfo(venda).texto}
+              </p>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <MessageCircle size={18} style={{ color: '#00e676', cursor: 'pointer' }} onClick={() => handleWhatsApp(venda)} />
+                {venda.status !== 'pago' && <CheckCircle size={18} style={{ color: 'var(--magenta)', cursor: 'pointer' }} onClick={() => handleMarcarPago(venda.id)} />}
+              </div>
             </div>
           </motion.div>
         ))}
